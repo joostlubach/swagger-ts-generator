@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir":  "lib",
+
+    "module": "commonjs",
+    "target": "es2015",
+    "lib":    ["es2017"],
+    "sourceMap": true,
+
+    "strict": true,
+    "allowUnreachableCode": true,
+    "experimentalDecorators": true,
+
+    "moduleResolution": "node",
+  },
+  "include": [
+    "types/*",
+    "src/**/*",
+  ]
+}

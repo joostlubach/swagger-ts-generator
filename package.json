@@ -1,0 +1,32 @@
+{
+  "name": "swagger-ts-generator",
+  "version": "1.0.0",
+  "description": "Generic TypeScript generator for Swagger.",
+  "main": "index.js",
+  "author": "Joost Lubach",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p .",
+    "prepublish": "yarn build"
+  },
+  "bin": {
+    "stsgen": "bin/stsgen"
+  },
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "fs-extra": "^7.0.0",
+    "handlebars": "^4.0.11",
+    "lodash": "^4.17.10",
+    "minimist": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^5.0.4",
+    "@types/handlebars": "^4.0.39",
+    "@types/lodash": "^4.14.115",
+    "@types/minimist": "^1.2.0",
+    "@types/node": "^10.5.5",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.14.0"
+  }
+}
