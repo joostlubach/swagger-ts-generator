@@ -51,6 +51,14 @@ export class Operation {
     return this.successResponses.concat(this.errorResponses)
   }
 
+  get paramsSerialization() {
+    const serialization: AnyObject = {}
+    for (const parameter of this.parameters) {
+      serialization[parameter.name] = parameter.serialization
+    }
+    return serialization
+  }
+
   get successResponses(): Response[] {
     const statuses = Object.keys(this.raw.responses)
       .map(s => parseInt(s, 10))

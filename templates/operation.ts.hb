@@ -1,6 +1,6 @@
 import {SwaggerOperation} from '../types'
-import {Response} from '../types'
-import {buildRequestOptions} from '../helpers'
+import {Response, ParamsSerialization} from '../types'
+import {serializeParameters} from '../helpers'
 import {request} from '../request'
 {{#each definitionImports}}
 import { {{~.~}} } from '../definitions'
@@ -10,7 +10,7 @@ import { {{~.~}} } from '../definitions'
 // Call
 
 export const {{call}}: {{name}} = (params?: {{name}}Params) => {
-  return request({{quote method}}, {{quote path}}, buildRequestOptions(params))
+  return request({{quote method}}, {{quote path}}, serializeParameters(params, paramsSerialization))
 }
 
 export type {{name}} = SwaggerOperation<{{name}}Params, {{name}}SuccessResponse, {{name}}ErrorResponse>
@@ -21,6 +21,12 @@ export type {{name}} = SwaggerOperation<{{name}}Params, {{name}}SuccessResponse,
 export interface {{name}}Params {
 {{#each parameters}}
   {{name}}{{#if schema.optional}}?{{/if}}: {{schema.tsType}}
+{{/each}}
+}
+
+export const paramsSerialization: ParamsSerialization = {
+{{#each paramsSerialization}}
+  {{sanitizeKey @key}}: {{emit . inline=true}},
 {{/each}}
 }
 

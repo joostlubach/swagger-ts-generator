@@ -9,7 +9,18 @@ export interface Response {
 }
 
 export interface RequestOptions {
-  data?:    any
-  query?:   any
-  headers?: any
+  query:   QueryString
+  data:    any
+  headers: Record<string, any>
 }
+
+export interface ParamsSerialization {
+  [name: string]: ParamSerialization
+}
+
+export interface ParamSerialization {
+  in: 'query' | 'header' | 'path' | 'formData' | 'body'
+  collectionFormat?: 'csv' | 'ssv' | 'tsv' | 'pipes' | 'multi'
+}
+
+export type QueryString = Array<{name: string, value: any}>

@@ -1,45 +1,64 @@
 import * as Handlebars from 'handlebars'
 import {isArray, isPlainObject} from 'lodash'
 import {sanitizeKey} from '.'
+import {quote} from './quote'
+
+export interface Options {
+  indent?:        number
+  emitUndefined?: boolean
+  inline?:        boolean
+}
 
 Handlebars.registerHelper('emit', function (object: any, opts: Handlebars.HelperOptions) {
   return new Handlebars.SafeString(emit(object, {indent: 0, ...opts.hash}))
 })
 
-export function emit(object: any, options: {indent: number}) {
+export function emit(object: any, options: Options = {}) {
   if (isArray(object)) {
     return emitArray(object, options)
   } else if (isPlainObject(object)) {
     return emitObject(object, options)
+  } else if (typeof object === 'string') {
+    return quote(object)
   } else {
     return JSON.stringify(object)
   }
 }
 
-export function emitArray(array: any[], options: {indent: number}) {
+export function emitArray(array: any[], options: Options = {}) {
   const lines: string[] = []
 
   lines.push(`[`)
   for (const item of array) {
-    lines.push(emit(item, {indent: options.indent + 1}))
+    lines.push(emit(item, {indent: (options.indent || 0) + 1}))
   }
-  lines.push(`${indent(options.indent)}]`)
+  lines.push(`${indent(options)}]`)
 
-  return lines.join('\n')
+  return lines.join(options.inline ? '' : '\n')
 }
 
-export function emitObject(object: AnyObject, options: {indent: number}) {
+export function emitObject(object: AnyObject, options: Options) {
   const lines: string[] = []
 
   lines.push(`{`)
   for (const [key, value] of Object.entries(object)) {
-    lines.push(`${indent(options.indent + 1)}${sanitizeKey(key)}: ${emit(value, {indent: options.indent + 1})},`)
-  }
-  lines.push(`${indent(options.indent)}}`)
+    if (value === undefined && !options.emitUndefined) { continue }
 
-  return lines.join('\n')
+    const childOptions = {
+      ...options,
+      indent: (options.indent || 0) + 1
+    }
+    lines.push(`${indent(childOptions)}${sanitizeKey(key)}: ${emit(value, childOptions)},`)
+  }
+  if (lines.length) {
+    lines[lines.length - 1] = lines[lines.length - 1].slice(0, -1)
+  }
+  lines.push(`${indent(options)}}`)
+
+  return lines.join(options.inline ? '' : '\n')
 }
 
-function indent(level: number) {
-  return Array(level + 1).join('  ')
+function indent(options: Options) {
+  if (options.inline) { return '' }
+  return Array((options.indent || 0) + 1).join('  ')
 }
