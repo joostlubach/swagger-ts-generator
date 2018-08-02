@@ -1,6 +1,6 @@
 import * as Handlebars from 'handlebars'
 import {isArray, isPlainObject} from 'lodash'
-import {quote} from './quote'
+import {sanitizeKey} from '.'
 
 Handlebars.registerHelper('emit', function (object: any, opts: Handlebars.HelperOptions) {
   return new Handlebars.SafeString(emit(object, {indent: 0, ...opts.hash}))
@@ -38,18 +38,6 @@ export function emitObject(object: AnyObject, options: {indent: number}) {
   lines.push(`${indent(options.indent)}}`)
 
   return lines.join('\n')
-}
-
-function sanitizeKey(key: any) {
-  if (typeof key !== 'string') {
-    return `[${quote(key)}]`
-  }
-
-  if (/[^a-zA-Z]/.test(key)) {
-    return quote(key)
-  }
-
-  return key
 }
 
 function indent(level: number) {
