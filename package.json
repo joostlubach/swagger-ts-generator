@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -p .",
-    "prepublish": "yarn build"
+    "preinstall": "yarn build"
   },
   "bin": {
     "stsgen": "bin/stsgen"
