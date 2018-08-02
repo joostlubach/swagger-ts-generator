@@ -1,14 +1,13 @@
 {
-  "name": "swagger-ts-generator",
+  "name": "@joostlubach/swagger-ts-generator",
   "version": "1.0.0",
   "description": "Generic TypeScript generator for Swagger.",
   "main": "index.js",
   "author": "Joost Lubach",
   "license": "MIT",
-  "private": true,
   "scripts": {
     "build": "tsc -p .",
-    "preinstall": "yarn build"
+    "prepublish": "yarn build"
   },
   "bin": {
     "stsgen": "bin/stsgen"
