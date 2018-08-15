@@ -7,7 +7,7 @@ import { {{~.~}} } from './{{.}}'
 {{#if isObject}}
 export interface {{name}} {
   {{#each schema.properties}}
-    {{sanitizeKey name}}: {{schema.tsType}}{{#if schema.nullable}} | null{{/if}}
+    {{sanitizeKey name}}: {{schema.tsType}}{{#if schema.x-nullable}} | null{{/if}}
   {{/each}}
 }
 {{else}}

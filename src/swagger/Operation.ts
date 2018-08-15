@@ -44,7 +44,10 @@ export class Operation {
   }
 
   get parameters(): Parameter[] {
-    return this.raw.parameters.map((raw: any) => new Parameter(raw))
+    const {parameters} = this.raw
+    if (parameters == null) { return [] }
+    
+    return parameters.map((raw: any) => new Parameter(raw))
   }
 
   get responses(): Response[] {
