@@ -8,18 +8,18 @@ export class Schema {
     Object.assign(this, omit(raw, 'properties'))
   }
 
-  $ref?: string
-  type?:   SwaggerType
+  public $ref?: string
+  public type?: SwaggerType
 
   // type === 'string'
-  format?:     string
-  enum?:       string[]
+  public format?: string
+  public enum?:   string[]
 
   // type === 'array'
-  items?:      Schema
+  public items?: Schema
 
   // type === 'object'
-  required?:   string[]
+  public required?: string[]
 
   public get optional() {
     return !this.required
@@ -100,10 +100,10 @@ export class Schema {
     if (this.type !== 'object') { return null }
 
     const pairs = []
-    for (const [key, schemaDef] of Object.entries(this.properties || [])) {
-      const schema = new Schema(schemaDef)
-      pairs.push(`${sanitizeKey(key)}: ${schema.tsType}`)
+    for (const {name, schema} of this.properties) {
+      pairs.push(`${sanitizeKey(name)}: ${schema.tsType}`)
     }
+    return '{' + pairs.join(', ') + '}'
   }
 
   public arrayDefinition() {

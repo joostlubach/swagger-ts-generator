@@ -6,9 +6,7 @@ export class Definition {
   constructor(
     public readonly name: string,
     private readonly raw: AnyObject
-  ) {
-    Object.assign(this, omit(raw, 'properties'))
-  }
+  ) {}
 
   get schema() {
     return new Schema(this.raw)

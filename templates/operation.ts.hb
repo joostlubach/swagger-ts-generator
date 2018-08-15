@@ -24,7 +24,7 @@ export interface {{name}}Params {
 {{/each}}
 }
 
-export const paramsSerialization: ParamsSerialization = {
+const paramsSerialization: ParamsSerialization = {
 {{#each paramsSerialization}}
   {{sanitizeKey @key}}: {{emit . inline=true}},
 {{/each}}
