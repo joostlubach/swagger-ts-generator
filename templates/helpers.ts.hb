@@ -1,6 +1,12 @@
 import {RequestOptions, ParamsSerialization, ParamSerialization, QueryString} from './types'
+import {escapeRegExp} from 'lodash'
 
-export function serializeParameters(params: AnyObject | undefined, paramsSerialization: ParamsSerialization): RequestOptions {
+interface Result {
+  path:    string
+  options: RequestOptions
+}
+
+export function serializeParameters(path: string, params: AnyObject | undefined, paramsSerialization: ParamsSerialization): Result {
   const options: RequestOptions = {
     query:   [],
     data:    null,
@@ -16,7 +22,7 @@ export function serializeParameters(params: AnyObject | undefined, paramsSeriali
       serializeQueryParameter(options.query, name, param, serialization)
       break
     case 'header':
-      options.headers[param.name] = serializeParameter(param, serialization)
+      options.headers[name] = serializeParameter(param, serialization)
       break
     case 'formData':
       options.data = []
@@ -24,14 +30,17 @@ export function serializeParameters(params: AnyObject | undefined, paramsSeriali
       break
     case 'body':
       options.data = {}
-      options.data[param.name] = serializeParameter(param, serialization)
+      options.data[name] = serializeParameter(param, serialization)
+      break
+    case 'path':
+      path = interpolatePath(path, name, serializeParameter(param, serialization))
       break
     default:
       throw new Error(`Serialization type \`${serialization.in}\` not supported`)
     }
   }
 
-  return options
+  return {path, options}
 }
 
 export function serializeQueryParameter(query: QueryString, name: string, value: string, serialization: ParamSerialization) {
@@ -60,4 +69,11 @@ export function serializeQueryParameter(query: QueryString, name: string, value:
 
 export function serializeParameter(parameter: any, serialization: ParamSerialization) {
   return parameter
+}
+
+export function interpolatePath(path: string, name: string, value: any) {
+  const pattern = `\{${escapeRegExp(name)}\}`
+  const regExp = new RegExp(pattern, 'g')
+
+  return path.replace(regExp, value.toString())
 }

@@ -8,6 +8,8 @@ export class Schema {
     Object.assign(this, omit(raw, 'properties'))
   }
 
+  [key: string]: any
+
   public $ref?: string
   public type?: SwaggerType
 
@@ -45,23 +47,27 @@ export class Schema {
   }
 
   public get definitionRefs() {
-    const definitionRefs: string[] = []
+    const definitionRefs: Set<string> = new Set()
     
     if (this.definitionRef) {
-      definitionRefs.push(this.definitionRef)
+      definitionRefs.add(this.definitionRef)
     }
 
     if (this.type === 'array') {
-      definitionRefs.push(...this.itemsSchema.definitionRefs)
+      for (const ref of this.itemsSchema.definitionRefs) {
+        definitionRefs.add(ref)
+      }
     }
 
     if (this.type === 'object') {
       for (const {schema} of this.properties) {
-        definitionRefs.push(...schema.definitionRefs)
+        for (const ref of schema.definitionRefs) {
+          definitionRefs.add(ref)
+        }
       }
     }
 
-    return definitionRefs
+    return [...definitionRefs]
   }
 
   public get isSimpleType() {
@@ -101,7 +107,9 @@ export class Schema {
 
     const pairs = []
     for (const {name, schema} of this.properties) {
-      pairs.push(`${sanitizeKey(name)}: ${schema.tsType}`)
+      let pair = `${sanitizeKey(name)}: ${schema.tsType}`
+      if (schema['x-nullable']) { pair += ' | null' }
+      pairs.push(pair)
     }
     return '{' + pairs.join(', ') + '}'
   }

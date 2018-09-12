@@ -10,7 +10,8 @@ import { {{~.~}} } from '../definitions'
 // Call
 
 export const {{call}}: {{name}} = (params?: {{name}}Params) => {
-  return request({{quote method}}, {{quote path}}, serializeParameters(params, paramsSerialization))
+  const {path, options} = serializeParameters({{quote path}}, params, paramsSerialization)
+  return request('get', path, options)
 }
 
 export type {{name}} = SwaggerOperation<{{name}}Params, {{name}}SuccessResponse, {{name}}ErrorResponse>
