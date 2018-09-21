@@ -11,7 +11,7 @@ import { {{~.~}} } from '../definitions'
 
 export const {{call}}: {{name}} = (params?: {{name}}Params) => {
   const {path, options} = serializeParameters({{quote path}}, params, paramsSerialization)
-  return request('get', path, options) as Promise<{{name}}SuccessResponse | {{name}}ErrorResponse>
+  return request({{quote method}}, path, options) as Promise<{{name}}SuccessResponse | {{name}}ErrorResponse>
 }
 
 export type {{name}} = SwaggerOperation<{{name}}Params, {{name}}SuccessResponse, {{name}}ErrorResponse>

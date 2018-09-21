@@ -20,7 +20,7 @@ export class Parameter {
   public collectionFormat!: 'csv' | 'ssv' | 'tsv' | 'pipes' | 'multi'
 
   get schema() {
-    return new Schema(this.raw)
+    return new Schema(this.raw.schema || this.raw)
   }
 
   get serialization() {

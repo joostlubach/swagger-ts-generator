@@ -29,8 +29,7 @@ export function serializeParameters(path: string, params: AnyObject | undefined,
       serializeQueryParameter(options.data, name, param, serialization)
       break
     case 'body':
-      options.data = {}
-      options.data[name] = serializeParameter(param, serialization)
+      options.data = serializeParameter(param, serialization)
       break
     case 'path':
       path = interpolatePath(path, name, serializeParameter(param, serialization))
