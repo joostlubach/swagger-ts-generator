@@ -5,6 +5,7 @@ import chalk from 'chalk'
 const usage = chalk`
 Usage: stsgen {bold <json-file>} {bold <out-dir>}
 `
+
 const options = CommandLineOptions.parse(process.argv.slice(2))
 if (!options.valid) {
   process.stderr.write(usage)

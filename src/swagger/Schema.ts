@@ -21,7 +21,7 @@ export class Schema {
   public items?: Schema
 
   // type === 'object'
-  public required?: string[]
+  public required?: boolean
 
   public get optional() {
     return !this.required

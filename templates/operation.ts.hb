@@ -1,5 +1,5 @@
 import {SwaggerOperation} from '../types'
-import {Response, ParamsSerialization} from '../types'
+import {NoConnectionResponse, ParamsSerialization} from '../types'
 import {serializeParameters} from '../helpers'
 import {request} from '../request'
 {{#each definitionImports}}
@@ -11,7 +11,7 @@ import { {{~.~}} } from '../definitions'
 
 export const {{call}}: {{name}} = (params?: {{name}}Params) => {
   const {path, options} = serializeParameters({{quote path}}, params, paramsSerialization)
-  return request('get', path, options)
+  return request('get', path, options) as Promise<{{name}}SuccessResponse | {{name}}ErrorResponse>
 }
 
 export type {{name}} = SwaggerOperation<{{name}}Params, {{name}}SuccessResponse, {{name}}ErrorResponse>
@@ -46,7 +46,7 @@ export interface {{name}} {
 //------
 // Error responses
 
-export type {{name}}ErrorResponse = {{#join errorResponses separator=' | '}}{{name}}{{/join}} | Response
+export type {{name}}ErrorResponse = {{#join errorResponses separator=' | '}}{{name}}{{/join}} | NoConnectionResponse
 
 {{#each errorResponses}}
 export interface {{name}} {

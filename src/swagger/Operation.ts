@@ -12,49 +12,52 @@ export class Operation {
     Object.assign(this, omit(raw, 'parameters', 'responses'))
   }
 
-  operationId!: string
+  public readonly operationId!: string
 
-  summary!: string
-  tags!: string[]
+  public readonly summary!: string
+  public readonly tags!: string[]
 
-  produces!: string[]
-  consumes!: string[]
+  public readonly produces!: string[]
+  public readonly consumes!: string[]
 
-  get name() {
+  public get name() {
     return upperFirst(camelCase(this.operationId))
   }
 
-  get call() {
+  public get call() {
     return lowerFirst(camelCase(this.operationId))
   }
 
-  get definitionImports() {
-    const imports: string[] = []
+  public get definitionImports() {
+    const imports: Set<string> = new Set()
 
     for (const parameter of this.parameters) {
-      imports.push(...parameter.schema.definitionRefs)
+      for (const ref of parameter.schema.definitionRefs) {
+        imports.add(ref)
+      }
     }
     for (const response of this.responses) {
-      if (response.schema) {
-        imports.push(...response.schema.definitionRefs)
+      if (!response.schema) { continue }
+      for (const ref of response.schema.definitionRefs) {
+        imports.add(ref)
       }
     }
 
-    return imports
+    return [...imports]
   }
 
-  get parameters(): Parameter[] {
+  public get parameters(): Parameter[] {
     const {parameters} = this.raw
     if (parameters == null) { return [] }
     
     return parameters.map((raw: any) => new Parameter(raw))
   }
 
-  get responses(): Response[] {
+  public get responses(): Response[] {
     return this.successResponses.concat(this.errorResponses)
   }
 
-  get paramsSerialization() {
+  public get paramsSerialization() {
     const serialization: AnyObject = {}
     for (const parameter of this.parameters) {
       serialization[parameter.name] = parameter.serialization
@@ -62,7 +65,7 @@ export class Operation {
     return serialization
   }
 
-  get successResponses(): Response[] {
+  public get successResponses(): Response[] {
     const statuses = Object.keys(this.raw.responses)
       .map(s => parseInt(s, 10))
       .filter(isSuccessStatus)
@@ -70,7 +73,7 @@ export class Operation {
       return statuses.map(status => new Response(status, this, this.raw.responses[status]))
   }
 
-  get errorResponses(): Response[] {
+  public get errorResponses(): Response[] {
     const statuses = Object.keys(this.raw.responses)
       .map(s => parseInt(s, 10))
       .filter(isErrorStatus)

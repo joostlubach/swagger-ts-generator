@@ -1,15 +1,17 @@
-import {ApiDescription, Operation, Definition} from './swagger'
+import {ApiDescription, Operation, Parameter, Definition} from './swagger'
 import Logger from './Logger'
 import chalk from 'chalk'
 import * as Path from 'path'
 import * as FS from 'fs-extra'
 import * as Handlebars from 'handlebars'
 import './helpers'
-import {camelCase} from 'lodash'
+import {createMatcher} from './util'
 
 export interface Options {
   jsonFile: string
   outDir:   string
+
+  defaultedParameters?: string[]
 }
 
 export default class Generator {
@@ -86,9 +88,35 @@ export default class Generator {
     const {method, path} = operation
     this.logger.log(chalk`{blue ⇢} Emitting operation {yellow ${method.toUpperCase()} ${path}}`)
 
-    await this.emitTemplate('operation', `operations/${operation.call}.ts`, operation)
+    const context = this.createOperationContext(operation)
+    await this.emitTemplate('operation', `operations/${operation.call}.ts`, context)
   }
 
+  private createOperationContext(operation: Operation): AnyObject {
+    if (!this.hasDefaultedParameters) { return operation }
+
+    return new Proxy(operation, {
+      get: (operation: Operation, key: PropertyKey) => {
+        switch (key) {
+        case 'parameters':
+          return this.markDefaultedParameters(operation, operation.parameters)
+        default:
+          return (operation as any)[key]
+        }
+      }
+    })
+  }
+
+  private markDefaultedParameters(operation: Operation, parameters: Parameter[]) {
+    return parameters.map(param => {
+      const qualifiedName = `${operation.name}.${param.name}`
+      if (this.isDefaultedParameter(qualifiedName)) {
+        return param.copy({required: false})
+      } else {
+        return param
+      }
+    })
+  }
 
   private async emitTemplate(name: string, path: string, data: AnyObject) {
     const template = await this.loadTemplate(name)
@@ -111,6 +139,21 @@ export default class Generator {
     const filename = Path.resolve(__dirname, `../templates/${name}.ts.hb`)
     const content = await FS.readFile(filename, 'utf-8')
     return Handlebars.compile(content, {noEscape: true})
+  }
+
+
+  //------
+  // Defaulted paramaters
+
+  private defaultedParameterMatcher = createMatcher(this.options.defaultedParameters)
+
+  private get hasDefaultedParameters() {
+    return this.defaultedParameterMatcher != null
+  }
+
+  private isDefaultedParameter(qualifiedName: string) {
+    if (this.defaultedParameterMatcher == null) { return false }
+    return this.defaultedParameterMatcher.test(qualifiedName)
   }
 
 }

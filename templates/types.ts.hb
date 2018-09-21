@@ -8,6 +8,10 @@ export interface Response {
   error?: Error
 }
 
+export interface NoConnectionResponse {
+  status: 0
+}
+
 export interface RequestOptions {
   query:   QueryString
   data:    any

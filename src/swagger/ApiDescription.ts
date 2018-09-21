@@ -22,22 +22,22 @@ export class ApiDescription {
     return new ApiDescription(raw)
   }
 
-  get info(): Info {
+  public get info(): Info {
     return this.raw.info
   }
 
-  get paths(): string[] {
+  public get paths(): string[] {
     return Object.keys(this.raw.paths)
   }
 
-  methodsForPath(path: string): string[] {
+  public methodsForPath(path: string): string[] {
     const entries = this.raw.paths[path]
     if (entries == null) { return [] }
 
     return Object.keys(entries)
   }
 
-  get operations(): Operation[] {
+  public get operations(): Operation[] {
     const operations: Operation[] = []
     for (const path of this.paths) {
       for (const method of this.methodsForPath(path)) {
@@ -49,14 +49,14 @@ export class ApiDescription {
     return operations
   }
 
-  getOperation(path: string, method: string) {
+  public getOperation(path: string, method: string) {
     const byMethod = this.raw.paths[path] || {}
     const operation = byMethod[method]
 
     return operation == null ? null : new Operation(method, path, operation)
   }
 
-  get definitions() {
+  public get definitions() {
     return Object.entries(this.raw.definitions)
       .map(([name, definition]) => new Definition(name, definition))
   }
