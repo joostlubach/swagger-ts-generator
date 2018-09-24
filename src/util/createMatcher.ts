@@ -7,5 +7,5 @@ export function createMatcher(patterns: string[] | null | undefined): RegExp | n
     .map(p => p.replace(/\\\*/g, '.*'))
     .join('|')
 
-  return new RegExp(pattern)
+  return new RegExp(`^${pattern}$`)
 }
