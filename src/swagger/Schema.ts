@@ -5,7 +5,7 @@ import {omit} from 'lodash'
 export class Schema {
 
   constructor(private readonly raw: AnyObject) {
-    Object.assign(this, omit(raw, 'properties'))
+    Object.assign(this, omit(raw, 'properties', 'additionalProperties'))
   }
 
   [key: string]: any
@@ -65,6 +65,13 @@ export class Schema {
           definitionRefs.add(ref)
         }
       }
+      
+      if (this.additionalProperties) {
+        const schema = this.additionalProperties
+        for (const ref of schema.definitionRefs) {
+          definitionRefs.add(ref)
+        }
+      }
     }
 
     return [...definitionRefs]
@@ -106,6 +113,13 @@ export class Schema {
     if (this.type !== 'object') { return null }
 
     const pairs = []
+    if (this.additionalProperties) {
+      const schema = this.additionalProperties
+      let pair = `[key: string]: ${schema.tsType}`
+      if (schema['x-nullable']) { pair += ' | null' }
+      pairs.push(pair)
+    }
+
     for (const {name, schema} of this.properties) {
       let pair = `${sanitizeKey(name)}: ${schema.tsType}`
       if (schema['x-nullable']) { pair += ' | null' }
@@ -125,6 +139,11 @@ export class Schema {
   public get properties() {
     return Object.entries(this.raw.properties || {})
       .map(([name, schema]) => ({name, schema: new Schema(schema)}))
+  }
+
+  public get additionalProperties() {
+    if (this.raw.additionalProperties == null) { return undefined }
+    return new Schema(this.raw.additionalProperties)
   }
 
 }

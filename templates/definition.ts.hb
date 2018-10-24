@@ -6,6 +6,9 @@ import { {{~.~}} } from './{{.}}'
 {{/if}}
 {{#if isObject}}
 export interface {{name}} {
+  {{#if schema.additionalProperties}}
+    [key: string]: {{schema.additionalProperties.tsType}}{{#if schema.additionalProperties.x-nullable}} | null{{/if}}
+  {{/if}}
   {{#each schema.properties}}
     {{sanitizeKey name}}: {{schema.tsType}}{{#if schema.x-nullable}} | null{{/if}}
   {{/each}}
