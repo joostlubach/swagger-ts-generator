@@ -9,12 +9,12 @@ import { {{~.~}} } from '../definitions'
 //------
 // Call
 
-export const {{call}}: {{name}} = (params?: {{name}}Params) => {
+export const {{call}}: {{name}}Operation = (params?: {{name}}Params) => {
   const {path, options} = serializeParameters({{quote path}}, params, paramsSerialization)
   return request({{quote method}}, path, options) as Promise<{{name}}SuccessResponse | {{name}}ErrorResponse>
 }
 
-export type {{name}} = SwaggerOperation<{{name}}Params, {{name}}SuccessResponse, {{name}}ErrorResponse>
+export type {{name}}Operation = SwaggerOperation<{{name}}Params, {{name}}SuccessResponse, {{name}}ErrorResponse>
 
 //------
 // Params

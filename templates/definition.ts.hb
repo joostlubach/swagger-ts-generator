@@ -5,7 +5,7 @@ import { {{~.~}} } from './{{.}}'
 
 {{/if}}
 {{#if isObject}}
-export interface {{name}} {
+export interface {{name}}{{extends}} {
   {{#if schema.additionalProperties}}
     [key: string]: {{schema.additionalProperties.tsType}}{{#if schema.additionalProperties.x-nullable}} | null{{/if}}
   {{/if}}

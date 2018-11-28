@@ -122,6 +122,7 @@ export default class Generator {
     const template = await this.loadTemplate(name)
     const content = template(data)
     const outPath = this.outPath(path)
+    await FS.ensureDir(Path.dirname(outPath))
     await FS.writeFile(outPath, content)    
   }
 

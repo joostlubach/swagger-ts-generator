@@ -1,4 +1,5 @@
 import * as FS from 'fs-extra'
+import fetch from 'node-fetch'
 import {Operation} from './Operation'
 import {Definition} from './Definition'
 
@@ -15,11 +16,25 @@ export class ApiDescription {
 
   constructor(public readonly raw: AnyObject) {}
 
-  public static async load(file: string) {
-    const content = await FS.readFile(file, 'utf-8')
-    const raw = JSON.parse(content)
+  public static async load(pathOrURL: string) {
+    let json: any
+    if (/https?:\/\//.test(pathOrURL)) {
+      json = await this.fetch(pathOrURL)
+    } else {
+      const content = await FS.readFile(pathOrURL, 'utf-8')
+      json = JSON.parse(content)
+    }
 
-    return new ApiDescription(raw)
+    return new ApiDescription(json)
+  }
+
+  private static async fetch(url: string) {
+    const response = await fetch(url)
+    if (response.status !== 200) {
+      throw new Error(`Could not load JSON from \`${url}\` (HTTP ${response.status})`)
+    }
+    
+    return await response.json()
   }
 
   public get info(): Info {

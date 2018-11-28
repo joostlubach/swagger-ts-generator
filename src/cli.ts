@@ -3,7 +3,7 @@ import Generator from './Generator'
 import chalk from 'chalk'
 
 const usage = chalk`
-Usage: stsgen {bold <json-file>} {bold <out-dir>}
+Usage: stsgen {bold <json-file|url-to-json-file>} {bold <out-dir>}
 `
 
 const options = CommandLineOptions.parse(process.argv.slice(2))

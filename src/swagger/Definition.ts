@@ -16,6 +16,13 @@ export class Definition {
     return this.schema.type === 'object'
   }
 
+  get extends() {
+    const {composedDefinitionRefs} = this.schema
+    if (composedDefinitionRefs.length === 0) { return '' }
+
+    return ` extends ${composedDefinitionRefs.join(', ')}`
+  }
+
   get definitionImports() {
     const imports: string[] = []
 

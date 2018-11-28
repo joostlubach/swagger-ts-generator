@@ -74,6 +74,22 @@ export class Schema {
       }
     }
 
+    for (const ref of this.composedDefinitionRefs) {
+      definitionRefs.add(ref)
+    }
+
+    return [...definitionRefs]
+  }
+
+  public get composedDefinitionRefs(): string[] {
+    const definitionRefs: Set<string> = new Set()
+
+    for (const schema of this.composedSchemas) {
+      for (const ref of schema.definitionRefs) {
+        definitionRefs.add(ref)
+      }
+    }
+
     return [...definitionRefs]
   }
 
@@ -125,7 +141,13 @@ export class Schema {
       if (schema['x-nullable']) { pair += ' | null' }
       pairs.push(pair)
     }
-    return '{' + pairs.join(', ') + '}'
+
+    const {composedDefinitionRefs} = this
+    const composed = composedDefinitionRefs.length > 0
+      ? `${composedDefinitionRefs.join(' & ')} & `
+      : ''
+
+    return composed + '{' + pairs.join(', ') + '}'
   }
 
   public arrayDefinition() {
@@ -136,14 +158,40 @@ export class Schema {
     }
   }
 
-  public get properties() {
-    return Object.entries(this.raw.properties || {})
-      .map(([name, schema]) => ({name, schema: new Schema(schema)}))
+  public get composedSchemas(): Schema[] {
+    return (this.raw.allOf || [])
+      .map((schema: any) => new Schema(schema))
   }
 
-  public get additionalProperties() {
-    if (this.raw.additionalProperties == null) { return undefined }
-    return new Schema(this.raw.additionalProperties)
+  public get properties() {
+    const properties: {[name: string]: Schema} = {}
+
+    // First add properties from composed schemas.
+    for (const schema of this.composedSchemas) {
+      Object.assign(properties, schema.properties)
+    }
+
+    // Add our own properties.
+    for (const [name, json] of Object.entries(this.raw.properties || {})) {
+      properties[name] = new Schema(json)
+    }
+
+    return Object.entries(properties).map(([name, schema]) => ({name, schema}))
+  }
+
+  public get additionalProperties(): Schema | undefined {
+    if (this.raw.additionalProperties != null) {
+      return new Schema(this.raw.additionalProperties)
+    }
+
+    // Check any of the composed schemas, in reversed order (last one has precedence).
+    for (const schema of this.composedSchemas.reverse()) {
+      const additional = schema.additionalProperties
+      if (additional != null) { return additional }
+    }
+
+    // Not found.
+    return undefined
   }
 
 }
