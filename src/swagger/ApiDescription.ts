@@ -16,16 +16,35 @@ export class ApiDescription {
 
   constructor(public readonly raw: AnyObject) {}
 
-  public static async load(pathOrURL: string) {
+  public static async load(pathOrURL: string | null) {
     let json: any
-    if (/https?:\/\//.test(pathOrURL)) {
+    if (pathOrURL == null) {
+      // Read from stdin.
+      const raw = await this.readFromStdin()
+      json = JSON.parse(raw)
+    } else if (/https?:\/\//.test(pathOrURL)) {
       json = await this.fetch(pathOrURL)
     } else {
-      const content = await FS.readFile(pathOrURL, 'utf-8')
-      json = JSON.parse(content)
+      const raw = await FS.readFile(pathOrURL, 'utf-8')
+      json = JSON.parse(raw)
     }
 
     return new ApiDescription(json)
+  }
+
+  private static readFromStdin(): Promise<string> {
+    return new Promise(resolve => {
+      let data = ''
+      process.stdin.on('data', chunk => {
+        data += chunk
+      })
+      process.stdin.on('end', () => {
+        resolve(data)
+      })
+
+      process.stdin.resume()
+      process.stdin.setEncoding('utf8')
+    })
   }
 
   private static async fetch(url: string) {

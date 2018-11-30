@@ -1,5 +1,9 @@
-import {RequestOptions, ParamsSerialization, ParamSerialization, QueryString} from './types'
+import {RequestOptions, ParamsSerialization, ParamSerialization, QueryString, Response} from './types'
+{{#if keyCaseConversion}}
+import {escapeRegExp, mapKeys, mapValues, isPlainObject, {{keyCaseConversion.lodashImport~}} } from 'lodash'
+{{else}}
 import {escapeRegExp} from 'lodash'
+{{/if}}
 
 interface Result {
   path:    string
@@ -76,3 +80,23 @@ export function interpolatePath(path: string, name: string, value: any) {
 
   return path.replace(regExp, value.toString())
 }
+
+export function processResponse(response: Response): Response {
+{{#if keyCaseConversion}}
+  response = convertKeyCase(response) as Response
+{{/if}}
+  return response
+}
+
+{{#if keyCaseConversion}}
+function convertKeyCase(obj: Record<string, any>): Record<string, any> {
+  return mapKeysDeep(obj, (_, key) => {{keyCaseConversion.snippet}})
+}
+
+function mapKeysDeep(obj: Record<string, any>, cb: (value: any, key: string) => string): Record<string, any> {
+  return mapValues(
+    mapKeys(obj, cb),
+    val => isPlainObject(val) ? mapKeysDeep(val, cb) : val
+  )
+}
+{{/if}}

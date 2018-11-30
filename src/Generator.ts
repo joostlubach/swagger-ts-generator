@@ -6,26 +6,19 @@ import * as FS from 'fs-extra'
 import * as Handlebars from 'handlebars'
 import './helpers'
 import {createMatcher} from './util'
-
-export interface Options {
-  jsonFile: string
-  outDir:   string
-
-  defaultedParameters?: string[]
-}
+import options, {Casing} from './CommandLineOptions'
 
 export default class Generator {
-
-  constructor(public readonly options: Options) {}
 
   public logger = new Logger()
 
   public async generate() {
-    const description = await ApiDescription.load(this.options.jsonFile)
+    const description = await ApiDescription.load(options.jsonFile)
     this.logger.log(chalk`{green ⇢} Loaded API description {yellow ${JSON.stringify(description.info.title)}}`)
 
     await this.emitSkeleton()
     await this.emitRequestHelper()
+    await this.emitHelpers()
     await this.emitInfo(description)
     await this.emitDefinitions(description)
     await this.emitOperations(description)
@@ -40,7 +33,6 @@ export default class Generator {
       ]
     })
     await this.emitTemplate('types', 'types.ts', {})
-    await this.emitTemplate('helpers', 'helpers.ts', {})
   }
 
   public async emitRequestHelper() {
@@ -50,6 +42,12 @@ export default class Generator {
       this.logger.log(chalk`{blue ⇢} Emitting request helper`)
       await this.emitTemplate('request', 'request.ts', {})
     }
+  }
+
+  public async emitHelpers() {
+    await this.emitTemplate('helpers', 'helpers.ts', {
+      keyCaseConversion: options.casing && KEY_CASE_CONVERSIONS[options.casing]
+    })
   }
 
   public async emitInfo(description: ApiDescription) {
@@ -130,7 +128,7 @@ export default class Generator {
   // Paths
 
   private outPath(path: string) {
-    return Path.resolve(this.options.outDir, path)
+    return Path.resolve(options.outDir, path)
   }
 
   //------
@@ -146,7 +144,7 @@ export default class Generator {
   //------
   // Defaulted paramaters
 
-  private defaultedParameterMatcher = createMatcher(this.options.defaultedParameters)
+  private defaultedParameterMatcher = createMatcher(options.defaultedParameters)
 
   private get hasDefaultedParameters() {
     return this.defaultedParameterMatcher != null
@@ -157,4 +155,11 @@ export default class Generator {
     return this.defaultedParameterMatcher.test(qualifiedName)
   }
 
+}
+
+const KEY_CASE_CONVERSIONS: Record<Casing, AnyObject> = {
+  [Casing.kebab]:  {lodashImport: 'kebabCase', snippet: 'kebabCase(key)'},
+  [Casing.snake]:  {lodashImport: 'snakeCase', snippet: 'snakeCase(key)'},
+  [Casing.camel]:  {lodashImport: 'camelCase', snippet: 'camelCase(key)'},
+  [Casing.pascal]: {lodashImport: 'camelCase, upperFirst', snippet: 'upperFirst(camelCase(key))'},
 }
