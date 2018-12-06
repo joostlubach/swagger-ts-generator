@@ -159,7 +159,7 @@ export default class Generator {
 
 const KEY_CASE_CONVERSIONS: Record<Casing, AnyObject> = {
   [Casing.kebab]:  {lodashImport: 'kebabCase', snippet: 'kebabCase(key)'},
-  [Casing.snake]:  {lodashImport: 'snakeCase', snippet: 'snakeCase(key)'},
+  [Casing.snake]:  {lodashImport: '', snippet: 'snakeCase(key)'},
   [Casing.camel]:  {lodashImport: 'camelCase', snippet: 'camelCase(key)'},
   [Casing.pascal]: {lodashImport: 'camelCase, upperFirst', snippet: 'upperFirst(camelCase(key))'},
 }

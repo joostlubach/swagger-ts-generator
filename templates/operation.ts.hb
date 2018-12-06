@@ -1,6 +1,6 @@
 import {SwaggerOperation} from '../types'
 import {NoConnectionResponse, ParamsSerialization} from '../types'
-import {serializeParameters, processResponse} from '../helpers'
+import {serializeParameters, prepareParams, processResponse} from '../helpers'
 import {request} from '../request'
 {{#each definitionImports}}
 import { {{~.~}} } from '../definitions'
@@ -10,7 +10,7 @@ import { {{~.~}} } from '../definitions'
 // Call
 
 export const {{call}}: {{name}}Operation = (params?: {{name}}Params) => {
-  const {path, options} = serializeParameters({{quote path}}, params, paramsSerialization)
+  const {path, options} = serializeParameters({{quote path}}, prepareParams(params), paramsSerialization)
   return request({{quote method}}, path, options).then(processResponse) as Promise<{{name}}SuccessResponse | {{name}}ErrorResponse>
 }
 

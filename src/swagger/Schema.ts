@@ -1,6 +1,6 @@
 import {SwaggerType} from './types'
 import {sanitizeKey, quote} from '../helpers'
-import {omit} from 'lodash'
+import {omit, isArray} from 'lodash'
 
 export class Schema {
 
@@ -137,7 +137,7 @@ export class Schema {
     }
 
     for (const {name, schema} of this.properties) {
-      let pair = `${sanitizeKey(name)}: ${schema.tsType}`
+      let pair = `${sanitizeKey(name)}${schema.optional ? '?' : ''}: ${schema.tsType}`
       if (schema['x-nullable']) { pair += ' | null' }
       pairs.push(pair)
     }
@@ -174,6 +174,13 @@ export class Schema {
     // Add our own properties.
     for (const [name, json] of Object.entries(this.raw.properties || {})) {
       properties[name] = new Schema(json)
+    }
+
+    // Mark required properties.
+    if (isArray(this.raw.required)) {
+      for (const name of this.raw.required) {
+        properties[name].required = true
+      }
     }
 
     return Object.entries(properties).map(([name, schema]) => ({name, schema}))

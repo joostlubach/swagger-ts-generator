@@ -10,7 +10,7 @@ export interface {{name}}{{extends}} {
     [key: string]: {{schema.additionalProperties.tsType}}{{#if schema.additionalProperties.x-nullable}} | null{{/if}}
   {{/if}}
   {{#each schema.properties}}
-    {{sanitizeKey name}}: {{schema.tsType}}{{#if schema.x-nullable}} | null{{/if}}
+    {{sanitizeKey name}}{{#if schema.optional}}?{{/if}}: {{schema.tsType}}{{#if schema.x-nullable}} | null{{/if}}
   {{/each}}
 }
 {{else}}
