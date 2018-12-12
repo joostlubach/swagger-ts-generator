@@ -26,6 +26,10 @@ export default class Generator {
 
   public async emitSkeleton() {
     this.logger.log(chalk`{blue ⇢} Emitting skeleton structure`)
+
+    await this.emptyDir('definitions')
+    await this.emptyDir('operations')
+
     await this.emitTemplate('index', 'index.ts', {
       index: [
         {export: '*', from: './operations'},
@@ -114,6 +118,11 @@ export default class Generator {
         return param
       }
     })
+  }
+
+  private async emptyDir(path: string) {
+    const outPath = this.outPath(path)
+    await FS.emptyDir(outPath)
   }
 
   private async emitTemplate(name: string, path: string, data: AnyObject) {
