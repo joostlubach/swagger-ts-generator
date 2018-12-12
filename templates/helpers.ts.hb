@@ -81,10 +81,13 @@ export function interpolatePath(path: string, name: string, value: any) {
   return path.replace(regExp, value.toString())
 }
 
-export function prepareParams(params: AnyObject) {
+export function prepareParams(params?: AnyObject): AnyObject | undefined {
+  if (params == null) { return }
+
 {{#if keyCaseConversion}}
-  params = convertParamsKeyCase(params) as Response
+  params = convertParamsKeyCase(params)
 {{/if}}
+
   return params
 }
 

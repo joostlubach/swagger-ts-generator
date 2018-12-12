@@ -177,13 +177,29 @@ export class Schema {
     }
 
     // Mark required properties.
-    if (isArray(this.raw.required)) {
-      for (const name of this.raw.required) {
-        properties[name].required = true
-      }
+    for (const name of this.requiredPropertyNames) {
+      properties[name].required = true
     }
 
     return Object.entries(properties).map(([name, schema]) => ({name, schema}))
+  }
+
+  public get requiredPropertyNames(): string[] {
+    const names: Set<string> = new Set()
+
+    for (const schema of this.composedSchemas) {
+      for (const name of schema.requiredPropertyNames) {
+        names.add(name)
+      }
+    }
+
+    if (isArray(this.raw.required)) {
+      for (const name of this.raw.required) {
+        names.add(name)
+      }
+    }
+
+    return [...names]
   }
 
   public get additionalProperties(): Schema | undefined {
