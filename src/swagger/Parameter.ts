@@ -1,6 +1,6 @@
 import {SwaggerType} from './types'
 import {Schema} from './Schema'
-import {omit} from 'lodash'
+import {omit, camelCase} from 'lodash'
 
 export class Parameter {
 
@@ -19,12 +19,25 @@ export class Parameter {
   public format!:           string
   public collectionFormat!: 'csv' | 'ssv' | 'tsv' | 'pipes' | 'multi'
 
+  public get safeName() {
+    return camelCase(this.name)
+  }
+
   get schema() {
     return new Schema(this.raw.schema || this.raw)
   }
 
+  get tsType() {
+    if (this.in === 'body' && this.type === 'file') {
+      return 'Binary'
+    } else {
+      return this.schema.tsType
+    }
+  }
+
   get serialization() {
     return {
+      name:             this.name,
       in:               this.in,
       collectionFormat: this.collectionFormat
     }

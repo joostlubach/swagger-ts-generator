@@ -1,6 +1,7 @@
-export interface SwaggerOperation<Params, Response, ErrorResponse> {
-  (params: Params): Promise<Response | ErrorResponse>
-}
+import {RequestOptions} from './request'
+
+export type SwaggerOperation<Params, Response, ErrorResponse> =
+  (params: Params, options?: RequestOptions) => Promise<Response | ErrorResponse>
 
 export interface Response {
   status: number
@@ -12,7 +13,11 @@ export interface NoConnectionResponse {
   status: 0
 }
 
-export interface RequestOptions {
+export interface RequestInfo {
+  method:  string
+  path:    string
+  options: RequestOptions
+  
   query:   QueryString
   data:    any
   headers: Record<string, any>
@@ -23,8 +28,11 @@ export interface ParamsSerialization {
 }
 
 export interface ParamSerialization {
+  name: string
   in: 'query' | 'header' | 'path' | 'formData' | 'body'
   collectionFormat?: 'csv' | 'ssv' | 'tsv' | 'pipes' | 'multi'
 }
 
 export type QueryString = Array<{name: string, value: any}>
+
+export type Binary = Blob | Uint8Array

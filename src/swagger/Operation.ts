@@ -60,7 +60,7 @@ export class Operation {
   public get paramsSerialization() {
     const serialization: AnyObject = {}
     for (const parameter of this.parameters) {
-      serialization[parameter.name] = parameter.serialization
+      serialization[parameter.safeName] = parameter.serialization
     }
     return serialization
   }

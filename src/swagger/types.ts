@@ -1,1 +1,1 @@
-export type SwaggerType = 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object' | 'any'
+export type SwaggerType = 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object' | 'file' | 'any'

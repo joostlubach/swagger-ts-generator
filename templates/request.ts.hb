@@ -1,5 +1,8 @@
-import {Response, RequestOptions} from './types'
+import {RequestInfo, Response} from './types'
 
-export async function request(method: string, path: string, options: RequestOptions): Promise<Response> {
+export interface RequestOptions {
+}
+
+export async function request(info: RequestInfo<RequestOptions>): Promise<Response> {
   // TODO: Fill in your request code.
 }

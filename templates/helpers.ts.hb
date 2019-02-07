@@ -1,17 +1,34 @@
-import {RequestOptions, ParamsSerialization, ParamSerialization, QueryString, Response} from './types'
+import {RequestInfo, ParamsSerialization, ParamSerialization, QueryString, Response} from './types'
+import {request, RequestOptions} from './request'
 {{#if keyCaseConversion}}
-import {escapeRegExp, mapKeys, mapValues, isArray, isPlainObject, snakeCase, {{keyCaseConversion.lodashImport~}} } from 'lodash'
+import {escapeRegExp, mapKeys, mapValues, isArray, isPlainObject, snakeCase, kebabCase, {{keyCaseConversion.lodashImport~}} } from 'lodash'
 {{else}}
-import {escapeRegExp} from 'lodash'
+import {kebabCase, escapeRegExp} from 'lodash'
 {{/if}}
 
-interface Result {
-  path:    string
-  options: RequestOptions
+export function performOperation(
+  method: string,
+  path: string,
+  params: AnyObject | undefined,
+  paramsSerialization: ParamsSerialization,
+  options?: RequestOptions
+) {
+  const info = buildRequestInfo(method, path, prepareParams(params), paramsSerialization, options || {})
+  return request(info).then(processResponse)
 }
 
-export function serializeParameters(path: string, params: AnyObject | undefined, paramsSerialization: ParamsSerialization): Result {
-  const options: RequestOptions = {
+function buildRequestInfo(
+  method: string,
+  path: string,
+  params: AnyObject | undefined,
+  paramsSerialization: ParamsSerialization,
+  options: RequestOptions
+): RequestInfo {
+  const info: RequestInfo = {
+    method:  method,
+    path:    path,
+    options: options,
+
     query:   [],
     data:    null,
     headers: {}
@@ -23,30 +40,30 @@ export function serializeParameters(path: string, params: AnyObject | undefined,
 
     switch (serialization.in) {
     case 'query':
-      serializeQueryParameter(options.query, name, param, serialization)
+      serializeQueryParameter(info.query, name, param, serialization)
       break
     case 'header':
-      options.headers[name] = serializeParameter(param, serialization)
+      info.headers[name] = serializeParameter(param, serialization)
       break
     case 'formData':
-      options.data = []
-      serializeQueryParameter(options.data, name, param, serialization)
+      info.data = []
+      serializeQueryParameter(info.data, name, param, serialization)
       break
     case 'body':
-      options.data = serializeParameter(param, serialization)
+      info.data = serializeParameter(param, serialization)
       break
     case 'path':
-      path = interpolatePath(path, name, serializeParameter(param, serialization))
+      info.path = interpolatePath(info.path, name, serializeParameter(param, serialization))
       break
     default:
       throw new Error(`Serialization type \`${serialization.in}\` not supported`)
     }
   }
 
-  return {path, options}
+  return info
 }
 
-export function serializeQueryParameter(query: QueryString, name: string, value: string, serialization: ParamSerialization) {
+function serializeQueryParameter(query: QueryString, name: string, value: string, serialization: ParamSerialization) {
   if (!Array.isArray(value)) {
     query.push({name, value})
     return
@@ -70,18 +87,18 @@ export function serializeQueryParameter(query: QueryString, name: string, value:
   }
 }
 
-export function serializeParameter(parameter: any, serialization: ParamSerialization) {
+function serializeParameter(parameter: any, serialization: ParamSerialization) {
   return parameter
 }
 
-export function interpolatePath(path: string, name: string, value: any) {
+function interpolatePath(path: string, name: string, value: any) {
   const pattern = `\{${escapeRegExp(name)}\}`
   const regExp = new RegExp(pattern, 'g')
 
   return path.replace(regExp, value.toString())
 }
 
-export function prepareParams(params?: AnyObject): AnyObject | undefined {
+function prepareParams(params?: AnyObject): AnyObject | undefined {
   if (params == null) { return }
 
 {{#if keyCaseConversion}}
@@ -91,7 +108,7 @@ export function prepareParams(params?: AnyObject): AnyObject | undefined {
   return params
 }
 
-export function processResponse(response: Response): Response {
+function processResponse(response: Response): Response {
 {{#if keyCaseConversion}}
   response = convertResponseKeyCase(response) as Response
 {{/if}}

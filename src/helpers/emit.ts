@@ -48,10 +48,10 @@ export function emitObject(object: AnyObject, options: Options) {
       ...options,
       indent: (options.indent || 0) + 1
     }
-    lines.push(`${indent(childOptions)}${sanitizeKey(key)}: ${emit(value, childOptions)},`)
+    lines.push(`${indent(childOptions)}${sanitizeKey(key)}: ${emit(value, childOptions)}, `)
   }
   if (lines.length) {
-    lines[lines.length - 1] = lines[lines.length - 1].slice(0, -1)
+    lines[lines.length - 1] = lines[lines.length - 1].slice(0, -2)
   }
   lines.push(`${indent(options)}}`)
 
