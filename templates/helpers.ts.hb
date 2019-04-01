@@ -13,7 +13,7 @@ export function performOperation(
   paramsSerialization: ParamsSerialization,
   options?: RequestOptions
 ) {
-  const info = buildRequestInfo(method, path, prepareParams(params), paramsSerialization, options || {})
+  const info = buildRequestInfo(method, path, params, paramsSerialization, options || {})
   return request(info).then(processResponse)
 }
 
@@ -34,26 +34,26 @@ function buildRequestInfo(
     headers: {}
   }
 
-  for (const [name, param] of Object.entries(params || {})) {
-    const serialization = paramsSerialization[name]
+  for (const [key, param] of Object.entries(params || {})) {
+    const serialization = paramsSerialization[key]
     if (serialization == null) { continue }
 
     switch (serialization.in) {
     case 'query':
-      serializeQueryParameter(info.query, name, param, serialization)
+      serializeQueryParameter(info.query, serialization.name, param, serialization)
       break
     case 'header':
-      info.headers[name] = serializeParameter(param, serialization)
+      info.headers[serialization.name] = serializeParameter(param, serialization)
       break
     case 'formData':
       info.data = []
-      serializeQueryParameter(info.data, name, param, serialization)
+      serializeQueryParameter(info.data, serialization.name, param, serialization)
       break
     case 'body':
       info.data = serializeParameter(param, serialization)
       break
     case 'path':
-      info.path = interpolatePath(info.path, name, serializeParameter(param, serialization))
+      info.path = interpolatePath(info.path, serialization.name, serializeParameter(param, serialization))
       break
     default:
       throw new Error(`Serialization type \`${serialization.in}\` not supported`)
@@ -88,6 +88,11 @@ function serializeQueryParameter(query: QueryString, name: string, value: string
 }
 
 function serializeParameter(parameter: any, serialization: ParamSerialization) {
+{{#if keyCaseConversion}}
+  if (serialization.in === 'body' && isPlainObject(parameter)) {
+    return convertParameterKeyCase(parameter)
+  }
+{{/if}}
   return parameter
 }
 
@@ -96,16 +101,6 @@ function interpolatePath(path: string, name: string, value: any) {
   const regExp = new RegExp(pattern, 'g')
 
   return path.replace(regExp, value.toString())
-}
-
-function prepareParams(params?: AnyObject): AnyObject | undefined {
-  if (params == null) { return }
-
-{{#if keyCaseConversion}}
-  params = convertParamsKeyCase(params)
-{{/if}}
-
-  return params
 }
 
 function processResponse(response: Response): Response {
@@ -120,7 +115,8 @@ function convertResponseKeyCase(obj: Record<string, any>): Record<string, any> {
   return mapKeysDeep(obj, (_, key) => {{keyCaseConversion.snippet}})
 }
 
-function convertParamsKeyCase(obj: Record<string, any>): Record<string, any> {
+function convertParameterKeyCase(obj: any): Record<string, any> {
+  if (!isPlainObject(obj)) { return obj }
   return mapKeysDeep(obj, (_, key) => snakeCase(key))
 }
 
