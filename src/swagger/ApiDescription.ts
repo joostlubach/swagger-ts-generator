@@ -18,18 +18,26 @@ export class ApiDescription {
 
   public static async load(pathOrURL: string | null) {
     let json: any
+    let scheme: string = 'https'
     if (pathOrURL == null) {
       // Read from stdin.
       const raw = await this.readFromStdin()
       json = JSON.parse(raw)
-    } else if (/https?:\/\//.test(pathOrURL)) {
+    } else if (/(https?):\/\//.test(pathOrURL)) {
+      scheme = RegExp.$1
       json = await this.fetch(pathOrURL)
     } else {
       const raw = await FS.readFile(pathOrURL, 'utf-8')
       json = JSON.parse(raw)
     }
 
-    return new ApiDescription(json)
+    const description = new ApiDescription(json)
+    console.log(scheme, description.schemes)
+    if (description.schemes.length === 0) {
+      description.schemes.push(scheme)
+    }
+
+    return description
   }
 
   private static readFromStdin(): Promise<string> {
@@ -58,6 +66,23 @@ export class ApiDescription {
 
   public get info(): Info {
     return this.raw.info
+  }
+
+  public get schemes(): string[] {
+    return this.raw.schemes || []
+  }
+
+  public get host(): string {
+    return this.raw.host
+  }
+
+  public get basePath(): string {
+    return this.raw.basePath
+  }
+
+  public get baseURL(): string {
+    const scheme = this.schemes[0] || 'https'
+    return `${scheme}://${this.host}${this.basePath}`
   }
 
   public get paths(): string[] {

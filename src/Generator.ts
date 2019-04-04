@@ -18,7 +18,7 @@ export default class Generator {
 
     await this.emitSkeleton()
     await this.emitRequestHelper()
-    await this.emitHelpers()
+    await this.emitHelpers(description)
     await this.emitInfo(description)
     await this.emitDefinitions(description)
     await this.emitOperations(description)
@@ -48,15 +48,16 @@ export default class Generator {
     }
   }
 
-  public async emitHelpers() {
+  public async emitHelpers(description: ApiDescription) {
     await this.emitTemplate('helpers', 'helpers.ts', {
+      description,
       keyCaseConversion: options.casing && KEY_CASE_CONVERSIONS[options.casing]
     })
   }
 
   public async emitInfo(description: ApiDescription) {
     this.logger.log(chalk`{blue ⇢} Emitting API info`)
-    await this.emitTemplate('info', 'info.ts', {info: description.info})
+    await this.emitTemplate('info', 'info.ts', description)
   }
 
   public async emitDefinitions(description: ApiDescription) {

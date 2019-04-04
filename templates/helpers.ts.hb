@@ -27,6 +27,7 @@ function buildRequestInfo(
   const info: RequestInfo = {
     method:  method,
     path:    path,
+    url:     endpointURL(path),
     options: options,
 
     query:   [],
@@ -61,6 +62,16 @@ function buildRequestInfo(
   }
 
   return info
+}
+
+const baseURL = {{emit description.baseURL}}
+
+function endpointURL(path: string) {
+  if (path.startsWith('/')) {
+    return `${baseURL}${path}`
+  } else {
+    return `${baseURL}/${path}`
+  }
 }
 
 function serializeQueryParameter(query: QueryString, name: string, value: string, serialization: ParamSerialization) {

@@ -16,6 +16,7 @@ export interface NoConnectionResponse {
 export interface RequestInfo {
   method:  string
   path:    string
+  url:     string
   options: RequestOptions
   
   query:   QueryString
