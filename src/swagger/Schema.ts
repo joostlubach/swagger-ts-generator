@@ -203,7 +203,9 @@ export class Schema {
   }
 
   public get additionalProperties(): Schema | undefined {
-    if (this.raw.additionalProperties != null) {
+    if (this.raw.additionalProperties === true) {
+      return new Schema({})
+    } else if (this.raw.additionalProperties != null) {
       return new Schema(this.raw.additionalProperties)
     }
 
